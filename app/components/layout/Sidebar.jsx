@@ -2,108 +2,43 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { MdOutlineDashboard, MdPeopleAlt, MdSubject } from "react-icons/md";
-import { FaFolder, FaClipboardList, FaBars, FaTimes, FaArrowUp } from "react-icons/fa";
+import { FaFolder, FaClipboardList, FaBars, FaTimes, FaArrowUp, FaChartBar, FaUserCircle, FaSignOutAlt, FaBookReader, FaUsers, FaFileAlt, FaHome, FaCog, FaChevronLeft, FaChevronRight, FaUserShield, FaChalkboardTeacher, FaUserGraduate, FaFileMedicalAlt, FaTasks, FaQrcode, FaCommentDots } from "react-icons/fa";
 import { SlCalender } from "react-icons/sl";
 import { FaMessage } from "react-icons/fa6";
 import { IoLogOut } from "react-icons/io5";
+import { BsClipboard2Check } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
-import { setInstructorRole } from "@/app/Redux/Slices/userRole";
+import { setInstructorRole } from "@/app/store/slices/userRole";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { hydrate } from "@/app/Redux/Slices/selectedCourseSlice";
+import { hydrate } from "@/app/store/slices/selectedCourseSlice";
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
   const router = useRouter();
   const pathname = usePathname();
   const userRole = useSelector((state) => state.userRole.isAdmin);
   const selectedCourse = useSelector((state) => state.selectedCourse?.course);
   const dispatch = useDispatch();
   const [activeLink, setActiveLink] = useState("");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Handle menu toggle for mobile
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  // Close mobile menu when clicking a link
-  const handleLinkClick = (label) => {
-    setActiveLink(label);
-    if (isMobile) {
-      setIsMobileMenuOpen(false);
-    }
-  };
-
-  // handle logout 
-  const handleLogout = () => {
-    // مسح جميع بيانات المستخدم من التخزين المحلي
-    localStorage.removeItem("token");
-    localStorage.removeItem("isAdmin");
-    localStorage.removeItem("isInstructor");
-    localStorage.removeItem("sessionId");
-    localStorage.removeItem("selectedCourse");
-    
-    // توجيه المستخدم إلى صفحة تسجيل الدخول
-    router.push("/auth/login");
-  }
-
-  // Handle manual attendance navigation
-  const handleManualAttendanceClick = (e) => {
-    e.preventDefault();
-    
-    // Check if a course is selected
-    if (!selectedCourse) {
-      // No course selected, redirect to subjects page to select a course
-      alert("Please select a course first");
-      router.push("/dashboard/doctor/subjects");
-    } else {
-      // Course is selected, navigate to manual attendance page
-      router.push("/dashboard/doctor/manualAttendance");
-    }
-    
-    setActiveLink("Manual Attendance");
-    if (isMobile) {
-      setIsMobileMenuOpen(false);
-    }
-  };
-
-  // Define sidebar items
+  
+  // Define sidebar items first so we can use them in the effect
   const sidebarItems = userRole ? [
-    { icon: <MdOutlineDashboard />, label: "Dashboard", href: "/dashboard" },
-    { icon: <MdPeopleAlt />, label: "Instructors", href: "/dashboard/pages/staff" },
-    { icon: <FaFolder />, label: "Documents", href: "/dashboard/pages/document" },
-    { icon: <FaArrowUp />, label: "My Grade", href: "/dashboard/pages/myGrade" },
-    { icon: <FaMessage />, label: "Messages", href: "/dashboard/messages" },
+    { icon: <MdOutlineDashboard />, label: "Dashboard", href: "/dashboard/admin/home" },
+    { icon: <MdPeopleAlt />, label: "Instructors", href: "/dashboard/admin" },
+    { icon: <FaFolder />, label: "Documents", href: "/dashboard/admin/document" },
+    { icon: <FaUserGraduate />, label: "Edit Students", href: "/dashboard/admin/document/studentsEdit" },
+    { icon: <FaArrowUp />, label: "My Grade", href: "/dashboard/admin/myGrade" },
+    { icon: <FaMessage />, label: "Messages", href: "#" },
   ] : [
-    { icon: <MdOutlineDashboard />, label: "Dashboard", href: "/dashboard/doctor" },
+    { icon: <MdOutlineDashboard />, label: "Dashboard", href: "/dashboard" },
     { icon: <MdSubject />, label: "Subjects", href: "/dashboard/doctor/subjects" },
-    { icon: <FaClipboardList />, label: "Take Attendance", href: "/dashboard/doctor/takeAttendance" },
-    { icon: <FaClipboardList />, label: "Manual Attendance", href: "#", onClick: handleManualAttendanceClick },
+    { icon: <SlCalender />, label: "Take Attendance", href: "/dashboard/doctor/takeAttendance" },
+    { icon: <BsClipboard2Check />, label: "Manual Attendance", href: "/dashboard/doctor/manualAttendance" },
     { icon: <MdPeopleAlt />, label: "Students", href: "/dashboard/doctor/students" },
     { icon: <MdPeopleAlt />, label: "Apology for attendance", href: "/dashboard/doctor/apology" },
     { icon: <FaMessage />, label: "Messages", href: "/dashboard/doctor/messages" },
   ];
-
-  // Check if device is mobile
-  useEffect(() => {
-    const checkWindowSize = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-    
-    checkWindowSize();
-    window.addEventListener('resize', checkWindowSize);
-    
-    return () => {
-      window.removeEventListener('resize', checkWindowSize);
-    };
-  }, []);
-
-  // Hydrate selected course from localStorage on component mount
-  useEffect(() => {
-    dispatch(hydrate());
-  }, [dispatch]);
-
+  
   // Set active link based on current path
   useEffect(() => {
     // Check exact matches first
@@ -130,89 +65,123 @@ const Sidebar = () => {
     if (pathname === "/dashboard" || pathname === "/dashboard/doctor") {
       setActiveLink("Dashboard");
     }
-    
-    console.log("Current pathname:", pathname);
-    console.log("Active link set to:", activeLink);
   }, [pathname, sidebarItems]);
 
-  // Mobile menu toggle button
-  const MobileMenuButton = () => (
-    <motion.button
-      onClick={toggleMobileMenu}
-      className="fixed top-4 left-4 z-50 p-2 rounded-full bg-[#1a1c2a]/90 text-gray-300 shadow-lg border border-[#2c2f42] lg:hidden"
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-    >
-      {isMobileMenuOpen ? (
-        <FaTimes className="text-xl" />
-      ) : (
-        <FaBars className="text-xl" />
-      )}
-    </motion.button>
-  );
+  // handle logout 
+  const handleLogout = () => {
+    // مسح جميع بيانات المستخدم من التخزين المحلي
+    localStorage.removeItem("token");
+    localStorage.removeItem("isAdmin");
+    localStorage.removeItem("isInstructor");
+    localStorage.removeItem("sessionId");
+    localStorage.removeItem("selectedCourse");
+    
+    // توجيه المستخدم إلى صفحة تسجيل الدخول
+    router.push("/auth/login");
+  }
+
+  // إغلاق السايدبار عند اختيار عنصر في وضع الموبايل
+  const handleLinkClick = (label) => {
+    setActiveLink(label);
+    if (isMobile) {
+      setIsOpen(false);
+    }
+  };
+
+  // Animation variants
+  const sidebarVariants = {
+    open: { 
+      x: 0,
+      boxShadow: "10px 0px 50px rgba(0,0,0,0.2)"
+    },
+    closed: { 
+      x: "-100%" 
+    }
+  };
+
+  const overlayVariants = {
+    open: { opacity: 0.5 },
+    closed: { opacity: 0 }
+  };
+
+  // Hydrate selected course from localStorage on component mount
+  useEffect(() => {
+    dispatch(hydrate());
+  }, [dispatch]);
 
   return (
     <>
-      <MobileMenuButton />
-      
-      <AnimatePresence>
-        {(!isMobile || isMobileMenuOpen) && (
-          <motion.div 
-            initial={{ x: isMobile ? -280 : -250 }}
-            animate={{ x: 0 }}
-            exit={{ x: isMobile ? -280 : -250 }}
-            transition={{ type: "spring", stiffness: 100, damping: 20 }}
-            className={`sidebar fixed top-0 left-0 h-screen ${isMobile ? 'w-[80%] max-w-[280px]' : 'w-64'} bg-[#1a1c2a] pt-24 shadow-lg z-20`}
-          >
-            <div className="flex flex-col h-full p-4">
-              <div className="flex-1 flex flex-col gap-2">
-                {sidebarItems.map((item, index) => (
-                  <Link
-                    key={index}
-                    href={item.href}
-                    onClick={item.onClick || (() => handleLinkClick(item.label))}
-                    className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 
-                      ${activeLink === item.label 
-                        ? "bg-[#7950f2] text-white" 
-                        : "text-gray-300 hover:bg-[#2c2f42] hover:text-white"}`}
-                  >
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="text-xl"
-                    >
-                      {item.icon}
-                    </motion.div>
-                    <span className="font-medium">{item.label}</span>
-                  </Link>
-                ))}
-              </div>
-              
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleLogout}
-                className="flex items-center gap-3 p-3 mt-4 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
-              >
-                <IoLogOut className="text-xl" />
-                <span className="font-medium">Logout</span>
-              </motion.button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
-      {/* Backdrop for mobile */}
-      {isMobileMenuOpen && isMobile && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 bg-black/50 z-10"
-          onClick={toggleMobileMenu}
-        />
+      {/* Dark overlay for mobile */}
+      {isMobile && (
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial="closed"
+              animate="open"
+              exit="closed"
+              variants={overlayVariants}
+              className="fixed inset-0 bg-black z-20 lg:hidden"
+              style={{ display: isOpen ? "block" : "none" }}
+              onClick={() => setIsOpen(false)}
+            />
+          )}
+        </AnimatePresence>
       )}
+
+      {/* Sidebar */}
+      <motion.div 
+        className={`sidebar fixed top-0 left-0 h-screen bg-[var(--secondary-dark)] pt-20 shadow-lg z-30
+          ${isMobile ? 'w-[280px]' : 'w-64'}`}
+        initial={isMobile ? "closed" : "open"}
+        animate={isMobile ? (isOpen ? "open" : "closed") : "open"}
+        variants={sidebarVariants}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      >
+        {/* Close button - only show on mobile */}
+        {isMobile && (
+          <button 
+            className="absolute top-4 right-4 text-[var(--foreground)] hover:text-red-500 transition-colors"
+            onClick={() => setIsOpen(false)}
+          >
+            <FaTimes size={20} />
+          </button>
+        )}
+
+        <div className="flex flex-col h-full p-4 overflow-y-auto custom-scrollbar">
+          <div className="flex-1 flex flex-col gap-2">
+            {sidebarItems.map((item, index) => (
+              <Link
+                key={index}
+                href={item.href}
+                onClick={() => handleLinkClick(item.label)}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 
+                  ${activeLink === item.label 
+                    ? "bg-[var(--primary)] text-white" 
+                    : "text-[var(--foreground)] hover:bg-[var(--secondary)] hover:text-[var(--foreground)]"}`}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="text-xl"
+                >
+                  {item.icon}
+                </motion.div>
+                <span className="font-medium">{item.label}</span>
+              </Link>
+            ))}
+          </div>
+          
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleLogout}
+            className="flex items-center gap-3 p-3 mt-4 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
+          >
+            <IoLogOut className="text-xl" />
+            <span className="font-medium">Logout</span>
+          </motion.button>
+        </div>
+      </motion.div>
     </>
   );
 };

@@ -1,212 +1,324 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { FaSort, FaSortUp, FaSortDown, FaEdit, FaTrash } from 'react-icons/fa';
+"use client";
+import React, { useMemo, useState, useEffect } from "react";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Toolbar,
+  Typography,
+  Paper,
+  Button,
+  useMediaQuery,
+} from "@mui/material";
+import { CiSearch, CiFilter } from "react-icons/ci";
+import { IoMdPersonAdd } from "react-icons/io";
+import { BiSort } from "react-icons/bi";
+import { MdDelete } from "react-icons/md";
+import { useDispatch, useSelector } from "react-redux";
+import { add, remove } from "../../store/slices/dataUploadReducer"; // Updated import path
 
-const DocumentTable = ({ data, searchTerm, selectedFilter }) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
-  const [filteredData, setFilteredData] = useState([]);
-  const itemsPerPage = 10;
+export default function DocumentTable() {
+  const [isRendered, setIsRendered] = useState(false);
+  const dispatch = useDispatch();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [newUser, setNewUser] = useState({
+    name: "",
+    email: "",
+    department: "",
+    level: "",
+    password: "",
+    passwordConfirm: "",
+  });
 
-  // Filter and sort data when dependencies change
   useEffect(() => {
-    let result = [...data];
-    
-    // Apply search filter
-    if (searchTerm) {
-      const lowerCaseSearchTerm = searchTerm.toLowerCase();
-      result = result.filter(item => 
-        Object.values(item).some(value => 
-          value && value.toString().toLowerCase().includes(lowerCaseSearchTerm)
-        )
+    setIsRendered(true);
+  }, []);
+
+  const users = useSelector((state) => state.dataUpload) || [];
+  console.log("dddddddddd", users);
+
+  const isSmallScreen = useMediaQuery("(max-width:930px)");
+
+  const filteredUsers = useMemo(() => {
+    if (!Array.isArray(users)) return [];
+
+    return users.filter((user) => {
+      const name = user?.name?.toLowerCase() || "";
+      const department = user?.department?.toLowerCase() || "";
+      const email = user?.email?.toLowerCase() || "";
+      const level = user?.level ? String(user.level) : "";
+
+      return (
+        name.includes(searchTerm.toLowerCase()) ||
+        department.includes(searchTerm.toLowerCase()) ||
+        email.includes(searchTerm.toLowerCase()) ||
+        level.includes(searchTerm)
       );
-    }
-    
-    // Apply category filter
-    if (selectedFilter && selectedFilter !== 'all') {
-      if (selectedFilter.includes('level')) {
-        const level = selectedFilter.split(' ')[1];
-        result = result.filter(item => 
-          item.level?.toString() === level || 
-          item.Level?.toString() === level
-        );
-      } else if (['cs', 'is', 'ai', 'bio'].includes(selectedFilter)) {
-        result = result.filter(item => 
-          (item.department?.toLowerCase() === selectedFilter) || 
-          (item.Department?.toLowerCase() === selectedFilter)
-        );
-      }
-    }
-    
-    // Apply sorting
-    if (sortConfig.key) {
-      result.sort((a, b) => {
-        const aValue = a[sortConfig.key] || '';
-        const bValue = b[sortConfig.key] || '';
-        
-        if (aValue < bValue) {
-          return sortConfig.direction === 'ascending' ? -1 : 1;
-        }
-        if (aValue > bValue) {
-          return sortConfig.direction === 'ascending' ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    
-    setFilteredData(result);
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [data, searchTerm, selectedFilter, sortConfig]);
+    });
+  }, [searchTerm, users]);
 
-  // Request sort
-  const requestSort = (key) => {
-    let direction = 'ascending';
-    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-      direction = 'descending';
+  const visibleRows = useMemo(() => {
+    return filteredUsers.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+  }, [page, rowsPerPage, filteredUsers]);
+
+  // delete from table
+
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      dispatch(remove(id));
     }
-    setSortConfig({ key, direction });
   };
 
-  // Get current items for pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  // save file
 
-  // Get column headers from data
-  const getHeaders = () => {
-    if (data.length === 0) return [];
-    const firstItem = data[0];
-    return Object.keys(firstItem);
-  };
-
-  const headers = getHeaders();
-
-  // Render sort icon based on current sort state
-  const renderSortIcon = (header) => {
-    if (sortConfig.key === header) {
-      return sortConfig.direction === 'ascending' ? 
-        <FaSortUp className="ml-1 text-blue-400" /> : 
-        <FaSortDown className="ml-1 text-blue-400" />;
+  const handleExportToExcel = () => {
+    if (users.length === 0) {
+      alert("No data to export!");
+      return;
     }
-    return <FaSort className="ml-1 text-gray-500 opacity-50" />;
+
+    // Convert JSON to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(users);
+
+    // Create a new workbook and append the worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "UsersData");
+
+    // Write the file and trigger download
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const data = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    // Save the file
+    saveAs(data, "UsersData.xlsx");
   };
+
+  // handle input change
+
+  const handleInputChange = (e) => {
+    const { value, name } = e.target;
+    setNewUser((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // add user
+  // const handleAddUser = () => {
+  //   if (window.confirm("Are you sure you want to Add this user?")) {
+  //     dispatch(add(newUser));
+  //   }
+  // };
+
+  if (!isRendered) {
+    return null;
+  }
 
   return (
-    <div className="w-full">
-      {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-[#2a2f3e]">
-        <table className="min-w-full divide-y divide-[#2a2f3e]">
-          <thead className="bg-[#1a1f2e]">
-            <tr>
-              {headers.map((header) => (
-                <th 
-                  key={header} 
-                  scope="col" 
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-[#232738] transition-colors"
-                  onClick={() => requestSort(header)}
-                >
-                  <div className="flex items-center">
-                    {header}
-                    {renderSortIcon(header)}
+    <>
+      <Box sx={{ width: "100%", position: "relative" }}>
+        <Paper
+          sx={{
+            width: "100%",
+            mb: 2,
+            backgroundColor: "#FDD05B57",
+            color: "#000",
+            padding: "20px",
+            borderRadius: "20px",
+          }}
+        >
+          <Toolbar>
+            <Typography sx={{ flex: "1 1 100%", color: "#000" }} variant="h6">
+              <div className="table-header flex flex-row justify-between w-full">
+                <div className="search flex flex-row items-center bg-white px-2 py-1 gap-2 rounded-lg">
+                  <CiSearch className="icon" />
+                  <input
+                    placeholder="Search"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-80 outline-none "
+                  />
                   </div>
-                </th>
-              ))}
-              <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-[#171b26] divide-y divide-[#2a2f3e]">
-            {currentItems.length > 0 ? (
-              currentItems.map((item, index) => (
-                <motion.tr 
-                  key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="hover:bg-[#1a1f2e] transition-colors"
-                >
-                  {headers.map((header) => (
-                    <td key={`${index}-${header}`} className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">
-                      {item[header]?.toString() || ''}
-                    </td>
-                  ))}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">
-                    <div className="flex space-x-3">
-                      <button className="text-blue-400 hover:text-blue-300 transition-colors">
-                        <FaEdit />
+                <div className="btns flex flex-row items-center gap-3">
+                  <button className="filter flex flex-row items-center gap-2 bg-[#67C587] text-white py-2 px-3 rounded-lg">
+                    <CiFilter className="icon" />
+                    <span>Filter</span>
                       </button>
-                      <button className="text-red-400 hover:text-red-300 transition-colors">
-                        <FaTrash />
+                  <button className="sort flex flex-row items-center gap-2 bg-[#67C587] text-white py-2 px-3 rounded-lg">
+                    <BiSort className="icon" />
+                    <span>Sort</span>
                       </button>
                     </div>
-                  </td>
-                </motion.tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={headers.length + 1} className="px-6 py-8 text-center text-gray-400">
-                  No data found matching your search criteria
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
       </div>
+            </Typography>
+          </Toolbar>
 
-      {/* Pagination */}
-      {filteredData.length > 0 && (
-        <div className="flex items-center justify-between mt-6 px-2">
-          <div className="text-sm text-gray-400">
-            Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} entries
-          </div>
-          <div className="flex space-x-2">
-            <button 
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className={`px-3 py-1 rounded-md ${
-                currentPage === 1 
-                  ? 'bg-[#1a1f2e] text-gray-500 cursor-not-allowed' 
-                  : 'bg-[#1a1f2e] text-gray-300 hover:bg-[#2a2f3e]'
-              } transition-colors`}
+          <TableContainer>
+            <Table
+              sx={{ minWidth: 750, color: "#000" }}
+              aria-labelledby="tableTitle"
             >
-              Previous
-            </button>
-            
-            {/* Page numbers */}
-            <div className="flex space-x-1">
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={`w-8 h-8 rounded-md flex items-center justify-center ${
-                    currentPage === i + 1
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-[#1a1f2e] text-gray-300 hover:bg-[#2a2f3e]'
-                  } transition-colors`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-            
-            <button 
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className={`px-3 py-1 rounded-md ${
-                currentPage === totalPages 
-                  ? 'bg-[#1a1f2e] text-gray-500 cursor-not-allowed' 
-                  : 'bg-[#1a1f2e] text-gray-300 hover:bg-[#2a2f3e]'
-              } transition-colors`}
-            >
-              Next
-            </button>
-          </div>
+              <TableHead className={`table-head ${isSmallScreen && "hidden"}`}>
+                <TableRow>
+                  {/* <TableCell sx={{ color: "#000" }}>Student ID</TableCell> */}
+                  <TableCell sx={{ color: "#000" }}>Name</TableCell>
+                  <TableCell align="center" sx={{ color: "#000" }}>
+                    Email
+                  </TableCell>
+                  <TableCell align="center" sx={{ color: "#000" }}>
+                    Department
+                  </TableCell>
+                  <TableCell align="center" sx={{ color: "#000" }}>
+                    Level
+                  </TableCell>
+                  <TableCell align="center" sx={{ color: "#000" }}>
+                    Password
+                  </TableCell>
+                  <TableCell align="center" sx={{ color: "#000" }}>
+                    Password confirmation
+                  </TableCell>
+                  <TableCell align="center" sx={{ color: "#000" }}>
+                    Actions
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {visibleRows.map((row, index) => (
+                  <TableRow key={index} hover sx={{ cursor: "pointer" }}>
+                    <TableCell align="left" sx={{ color: "#000" }}>
+                      {row.name}
+                    </TableCell>
+                    <TableCell align="center" sx={{ color: "#000" }}>
+                      {row.email}
+                    </TableCell>
+                    <TableCell align="center" sx={{ color: "#000" }}>
+                      {row.department}
+                    </TableCell>
+                    <TableCell align="center" sx={{ color: "#000" }}>
+                      {row.level}
+                    </TableCell>
+                    <TableCell align="center" sx={{ color: "#000" }}>
+                      {row.password}
+                    </TableCell>
+                    <TableCell align="center" sx={{ color: "#000" }}>
+                      {row.passwordConfirm}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        onClick={() => handleDelete(index)}
+                        sx={{ color: "#D32F2F" }}
+                      >
+                        <MdDelete size={20} />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={users.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={(_, newPage) => setPage(newPage)}
+            onRowsPerPageChange={(e) =>
+              setRowsPerPage(parseInt(e.target.value, 10))
+            }
+            sx={{
+              color: "#000",
+              "& .MuiSelect-icon": { color: "#000" },
+              "& .MuiTablePagination-actions button": { color: "#000" },
+            }}
+          />
+        </Paper>
+        <div className="add bg-[#27CDA55C] flex flex-row items-center justify-between border-black border-2 mb-4">
+          <input
+            name="name"
+            value={newUser.name || ""}
+            onChange={handleInputChange}
+            type="text"
+            placeholder="Name"
+            className="bg-[#27CDA55C] py-3 px-2 w-1/5 outline-none border-black border-l-2"
+          />
+          <input
+            name="email"
+            value={newUser.email || ""}
+            onChange={handleInputChange}
+            type="text"
+            placeholder="Recorded Materials"
+            className="bg-[#27CDA55C] py-3 px-2 w-1/5 outline-none border-black border-l-2"
+          />
+          <input
+            name="department"
+            value={newUser.department || ""}
+            onChange={handleInputChange}
+            type="text"
+            placeholder="Department"
+            className="bg-[#27CDA55C] py-3 px-2 w-1/5 outline-none border-black border-l-2"
+          />
+          <input
+            name="level"
+            value={newUser.level || ""}
+            onChange={handleInputChange}
+            type="number"
+            placeholder="Department"
+            className="bg-[#27CDA55C] py-3 px-2 w-1/5 outline-none border-black border-l-2"
+          />
+          <input
+            name="password"
+            value={newUser.password || ""}
+            onChange={handleInputChange}
+            type="text"
+            placeholder="Password"
+            className="bg-[#27CDA55C] py-3 px-2 w-1/5 outline-none border-black border-l-2"
+          />
+          <input
+            name="passwordConfirm"
+            value={newUser.passwordConfirm || ""}
+            onChange={handleInputChange}
+            type="text"
+            placeholder="Password Confirm"
+            className="bg-[#27CDA55C] py-3 px-2 w-1/5 outline-none border-black border-l-2"
+          />
+          <Button
+            onClick={() => dispatch(add(newUser))}
+            sx={{
+              color: "#000",
+              borderLeft: "2px solid black",
+              borderRadius: "0px !important",
+            }}
+            className="w-1/5 border-black border-l-2"
+          >
+            <IoMdPersonAdd size={20} />
+            Add
+          </Button>
         </div>
-      )}
-    </div>
+      </Box>
+      <button
+        onClick={handleExportToExcel}
+        className="export flex flex-row items-center gap-2 bg-[#FDD05B] text-black py-2 px-3 rounded-lg mb-3"
+      >
+        Save Excel File
+      </button>
+    </>
   );
-};
-
-export default DocumentTable; 
+} 

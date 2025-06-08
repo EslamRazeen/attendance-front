@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   course: null,
-  sessionId: null,
 };
 
 export const selectedCourseSlice = createSlice({
@@ -12,7 +11,6 @@ export const selectedCourseSlice = createSlice({
     hydrate: (state) => {
       if (typeof window !== "undefined") {
         state.course = JSON.parse(localStorage.getItem("selectedCourse") || "null");
-        state.sessionId = localStorage.getItem("sessionId") || null;
       }
     },
     setSelectedCourse: (state, action) => {
@@ -21,20 +19,8 @@ export const selectedCourseSlice = createSlice({
         localStorage.setItem("selectedCourse", JSON.stringify(action.payload));
       }
     },
-    setSessionId: (state, action) => {
-      state.sessionId = action.payload;
-      if (typeof window !== "undefined") {
-        localStorage.setItem("sessionId", action.payload);
-      }
-    },
-    clearSessionId: (state) => {
-      state.sessionId = null;
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("sessionId");
-      }
-    },
   },
 });
 
-export const { setSelectedCourse, setSessionId, hydrate, clearSessionId } = selectedCourseSlice.actions;
+export const { setSelectedCourse, hydrate } = selectedCourseSlice.actions;
 export default selectedCourseSlice.reducer;

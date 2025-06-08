@@ -8,11 +8,13 @@ import {
   useCreateSessionMutation,
   useGetQrCodeMutation,
   useEndSessionMutation,
-} from "@/app/Redux/features/sessionApiSlice";
+} from "@/app/store/features/sessionApiSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { setSessionId, clearSessionId } from "@/app/Redux/Slices/sessionSlice";
+import { setSessionId, clearSessionId } from "@/app/store/slices/sessionSlice";
 import { motion, AnimatePresence } from "framer-motion";
-import { useError } from "@/app/components/ErrorManager";
+import { useError } from "@/app/components/layout/ErrorManager";
+import { setSelectedCourseId } from "@/app/store/slices/selectedCourseSlice";
+import { FaSync, FaCheckCircle, FaTimesCircle, FaMobileAlt, FaServer, FaWifi, FaExclamationTriangle } from "react-icons/fa";
 
 const Page = () => {
   const selectedCourse = useSelector((state) => state.selectedCourse.course);
@@ -41,7 +43,7 @@ const Page = () => {
     
     try {
       const response = await createSession({
-        course: selectedCourse?._id || "67b8f87450147de33624ea4d",
+        course: selectedCourse?._id,
         changeSpeed: changeTime.changeSpeed,
         timeWorking: changeTime.timeWorking,
       }).unwrap();

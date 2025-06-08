@@ -3,10 +3,10 @@ import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Header from "@/app/components/Header";
+import Header from "@/app/components/layout/Header";
 import { FaUserAlt, FaLock, FaArrowLeft, FaEnvelope } from "react-icons/fa";
 import { motion } from "framer-motion";
-import { useLanguage } from "@/app/components/LanguageProvider";
+import { useLanguage } from "@/app/components/providers/LanguageProvider";
 
 export default function PasswordReset() {
   const router = useRouter();
@@ -99,8 +99,8 @@ export default function PasswordReset() {
               </h1>
               <p className="mt-2 text-[var(--foreground-secondary)]">
                 {resetSent 
-                  ? "We've sent you instructions to reset your password." 
-                  : "Enter your email address and we'll send you instructions to reset your password."}
+                  ? "We&apos;ve sent you instructions to reset your password." 
+                  : "Enter your email address and we&apos;ll send you instructions to reset your password."}
               </p>
             </div>
             
@@ -170,11 +170,11 @@ export default function PasswordReset() {
             ) : (
               <div className="space-y-6">
                 <div className="p-4 bg-green-100 text-green-700 rounded-lg">
-                  <p>We've sent an email to <strong>{email}</strong> with instructions to reset your password.</p>
+                  <p>We&apos;ve sent an email to <strong>{email}</strong> with instructions to reset your password.</p>
                 </div>
                 
                 <div className="text-center text-[var(--foreground-secondary)] text-sm">
-                  <p>Didn't receive the email? Check your spam folder or</p>
+                  <p>Didn&apos;t receive the email? Check your spam folder or</p>
                   <button 
                     onClick={() => setResetSent(false)} 
                     className="text-[var(--primary)] hover:text-[var(--primary-light)] font-medium"

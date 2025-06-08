@@ -3,9 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import Header from "../components/Header";
+import Header from "@/app/components/layout/Header";
 import { motion } from "framer-motion";
-import { useLanguage } from "../components/LanguageProvider";
+import { useLanguage } from "@/app/components/providers/LanguageProvider";
 
 export default function Welcome() {
   const [visible, setVisible] = useState(false);

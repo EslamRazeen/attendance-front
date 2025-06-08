@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import SplashScreen from "@/app/components/ui/SplashScreen";
 import Welcome from "./welcome/Welcome";
-import SplashScreen from "./components/SplashScreen";
 
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true);

@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { FaFilter, FaChalkboardTeacher, FaBookOpen, FaCalendarCheck, FaCalendarTimes, FaUserGraduate, FaSync, FaChartLine, FaChevronDown } from "react-icons/fa";
-import InstructorDashCard from "@/app/items/InstructorDashCard";
-import InstructorPieChart from "@/app/items/InstructorPieChart";
-import InstructorLineChart from "@/app/items/InstructorLineChart";
-import { useGetCoursesQuery } from "@/app/Redux/features/coursesApiSlice";
-import { useGetDoctorDashboardDataMutation } from "@/app/Redux/features/dashboardApiSlice";
+import { FaFilter, FaChalkboardTeacher, FaBookOpen, FaCalendarCheck, FaCalendarTimes, FaUserGraduate, FaSync, FaChartLine, FaChevronDown, FaBook, FaChartBar, FaUsers, FaTasks, FaQrcode, FaCommentDots, FaSignOutAlt, FaUniversity, FaExclamationCircle, FaSpinner } from "react-icons/fa";
+import InstructorDashCard from "@/app/components/dashboard/doctor/InstructorDashCard";
+import InstructorPieChart from "@/app/components/dashboard/doctor/InstructorPieChart";
+import InstructorLineChart from "@/app/components/dashboard/doctor/InstructorLineChart";
+import { useGetCoursesQuery } from "@/app/store/features/coursesApiSlice";
+import { useGetDoctorDashboardDataMutation } from "@/app/store/features/dashboardApiSlice";
 import { useSelector } from "react-redux";
 
 const InstructorDashboard = () => {

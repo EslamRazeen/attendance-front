@@ -1,6 +1,6 @@
 "use client";
-import { useGetCoursesQuery } from "@/app/Redux/features/coursesApiSlice";
-import { setSelectedCourse } from "@/app/Redux/Slices/selectedCourseSlice";
+import { useGetCoursesQuery } from "@/app/store/features/coursesApiSlice";
+import { setSelectedCourse } from "@/app/store/slices/selectedCourseSlice";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useMemo, useEffect } from "react";

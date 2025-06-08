@@ -9,18 +9,18 @@ import FormControl from "@mui/material/FormControl";
 import Checkbox from "@mui/material/Checkbox";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
-import Header from "@/app/components/Header";
+import Header from "@/app/components/layout/Header";
 import { FaUserAlt, FaLock, FaSignInAlt, FaEye, FaEyeSlash, FaUserTie, FaUserGraduate } from "react-icons/fa";
 import { motion } from "framer-motion";
-import { useLanguage } from "@/app/components/LanguageProvider";
+import { useLanguage } from "@/app/components/providers/LanguageProvider";
 import {
-  setAdminRole,
-  setLecturerRole,
-  setInstructorRole,
   setToken,
+  setAdminRole,
+  setInstructorRole,
+  setLecturerRole,
   setInstructorCourses,
-} from "@/app/Redux/Slices/userRole";
-import { useLoginMutation } from "@/app/Redux/features/authApiSlice";
+} from "@/app/store/slices/userRole";
+import { useLoginMutation } from "@/app/store/features/authApiSlice";
 
 export default function Page() {
   const router = useRouter();

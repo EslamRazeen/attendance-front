@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { useGetAllUsersQuery, useDeleteStaffUserMutation } from '@/app/Redux/features/usersApiSlice';
+import { useGetAllUsersQuery, useDeleteStaffUserMutation } from '@/app/store/features/usersApiSlice';
 
 export const useInstructorManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");

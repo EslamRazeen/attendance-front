@@ -1,8 +1,8 @@
 'use client';
 
 import React from "react";
-import ProtectedRoute from "../../components/ProtectedRoute";
-import PageTransition from "../../components/PageTransition";
+import ProtectedRoute from "@/app/components/layout/ProtectedRoute";
+import PageTransition from "@/app/components/layout/PageTransition";
 import { AnimatePresence } from "framer-motion";
 
 export default function DoctorLayout({ children }) {

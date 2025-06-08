@@ -1,15 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import Navbar from "../components/navBar";
-import Sidebar from "../components/sideBar";
-import DashboardPath from "../items/dashboardPath";
-import ProtectedRoute from "../components/ProtectedRoute";
-import PageTransition from "../components/PageTransition";
-import ErrorProvider from "../components/ErrorManager";
+import Navbar from "@/app/components/layout/navBar";
+import Sidebar from "@/app/components/layout/Sidebar";
+import DashboardPath from "@/app/components/layout/DashboardPath";
+import ProtectedRoute from "@/app/components/layout/ProtectedRoute";
+import PageTransition from "@/app/components/layout/PageTransition";
+import ErrorProvider from "@/app/components/layout/ErrorManager";
 import { AnimatePresence } from "framer-motion";
-import { useTheme } from "../components/ThemeProvider";
-import { useLanguage } from "../components/LanguageProvider";
+import { useTheme } from "@/app/components/providers/ThemeProvider";
+import { useLanguage } from "@/app/components/providers/LanguageProvider";
 import { FaBars } from "react-icons/fa";
 
 const Layout = ({ children }) => {

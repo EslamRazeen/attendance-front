@@ -4,22 +4,26 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import Header from '@/app/components/Header';
-import AttendanceTable from '@/app/items/AttendanceTable';
+import Header from '@/app/components/layout/Header';
+import { FaSync, FaCalendarPlus, FaClock, FaUsers, FaTimesCircle, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import { useError } from "@/app/components/layout/ErrorManager";
+import { useLanguage } from "@/app/components/providers/LanguageProvider";
+import AttendanceTable from '@/app/components/ui/AttendanceTable';
 import { 
   FaBookOpen, 
-  FaClock, 
   FaQrcode, 
   FaHourglassHalf, 
   FaUserCheck, 
   FaUserTimes 
 } from 'react-icons/fa';
-import { 
+import {
   useCreateSessionMutation,
-  useGetQrCodeMutation 
-} from '@/app/Redux/features/sessionApiSlice';
-import { setSessionId } from '@/app/Redux/Slices/sessionSlice';
-import { hydrate as hydrateSelectedCourse } from '@/app/Redux/Slices/selectedCourseSlice';
+  useGetQrCodeMutation,
+  useEndSessionMutation,
+  useGetSessionsByCourseIdQuery
+} from '@/app/store/features/sessionApiSlice';
+import { setSessionId } from '@/app/store/slices/sessionSlice';
+import { hydrate as hydrateSelectedCourse } from '@/app/store/slices/selectedCourseSlice';
 import { 
   Box, 
   Paper, 
@@ -32,7 +36,9 @@ import {
   DialogActions, 
   TextField 
 } from '@mui/material';
-import { useTheme } from '@/app/components/ThemeProvider';
+import { useTheme } from "@/app/components/providers/ThemeProvider";
+import { useDeleteAttendanceMutation, useLazyGetAttendanceByCourseAndDateQuery, useLazyGetAttendanceByDateQuery, useMarkAttendanceMutation } from "@/app/store/features/attendanceApiSlice";
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 const ManualAttendancePage = () => {
     const router = useRouter();

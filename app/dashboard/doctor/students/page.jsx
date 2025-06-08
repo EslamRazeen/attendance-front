@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
-// import { useGetAllAttendancesQuery } from "@/app/Redux/features/attendanceApiSlice"; // Old hook
-import { useGetStudentsByDateQuery } from "@/app/Redux/features/attendanceApiSlice"; // New hook for students
-import { useGetCourseSessionsQuery } from "@/app/Redux/features/sessionApiSlice"; // Hook for sessions
+// import { useGetAllAttendancesQuery } from "@/app/store/features/attendanceApiSlice"; // Old hook - Updated path
+import { useGetStudentsByDateQuery } from "@/app/store/features/attendanceApiSlice"; // New hook for students - Updated path
+import { useGetCourseSessionsQuery } from "@/app/store/features/sessionApiSlice"; // Hook for sessions - Updated path
 import { motion } from "framer-motion";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";

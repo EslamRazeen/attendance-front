@@ -11,6 +11,10 @@ const initialState = {
       : false,
   token:
     typeof window !== "undefined" ? localStorage.getItem("token") || "" : "",
+  instructorCourses:
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("instructorCourses") || "[]")
+      : [],
 };
 
 const userRoleSlice = createSlice({
@@ -22,6 +26,7 @@ const userRoleSlice = createSlice({
         state.isAdmin = localStorage.getItem("isAdmin") === "true";
         state.isInstructor = localStorage.getItem("isInstructor") === "true";
         state.token = localStorage.getItem("token") || "";
+        state.instructorCourses = JSON.parse(localStorage.getItem("instructorCourses") || "[]");
       }
     },
     setAdminRole: (state) => {
@@ -48,6 +53,12 @@ const userRoleSlice = createSlice({
         localStorage.setItem("token", action.payload);
       }
     },
+    setInstructorCourses: (state, action) => {
+      state.instructorCourses = action.payload;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("instructorCourses", JSON.stringify(action.payload));
+      }
+    },
   },
 });
 
@@ -57,5 +68,6 @@ export const {
   setLecturerRole,
   setToken,
   hydrateUserRole,
+  setInstructorCourses,
 } = userRoleSlice.actions;
 export default userRoleSlice.reducer;

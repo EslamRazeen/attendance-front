@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useLanguage } from './components/LanguageProvider';
+import { useLanguage } from '@/app/components/providers/LanguageProvider';
 
 export default function Loading() {
   const { t } = useLanguage();

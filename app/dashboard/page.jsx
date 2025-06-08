@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect } from "react";
-import DashHome from "./pages/home/page";
-import ProtectedRoute from "../components/ProtectedRoute";
+import DashHome from "./admin/home/page";
+import ProtectedRoute from "@/app/components/layout/ProtectedRoute";
 import { useRouter } from "next/navigation";
 
 const Dashboard = () => {

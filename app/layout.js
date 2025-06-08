@@ -1,16 +1,13 @@
-// app/layout.tsx
-import { Inder , Gugi , Julee , Poppins} from "next/font/google";
-import { ThemeProvider } from './components/ThemeProvider';
-import { LanguageProvider } from './components/LanguageProvider';
+// app/layout.js
+import { Inder } from "next/font/google";
+import { ThemeProvider } from '@/app/components/providers/ThemeProvider';
+import { LanguageProvider } from '@/app/components/providers/LanguageProvider';
 import "./globals.css";
-import ReduxProvider from "./Redux/provider";
-import PageTransition from "./components/PageTransition";
+import ReduxProvider from "@/app/store/Provider.jsx";
+import PageTransition from "@/app/components/layout/PageTransition";
 
 // استخدام خط Inder كافتراضي
 const inder = Inder({ subsets: ["latin"], weight: "400" });
-const gugi = Gugi({ subsets: ["latin"], weight: "400" });
-const julee = Julee({ subsets: ["latin"], weight: "400" });
-const poppins = Poppins({ subsets: ["latin"], weight: "400", display: 'swap' });
 
 export const metadata = {
   title: "FCAI Attendance System",
@@ -25,7 +22,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${inder.className} ${gugi.className} ${julee.className} ${poppins.className} antialiased`}>
+      <body className={`${inder.className} antialiased`}>
        <ReduxProvider>
         <LanguageProvider>
           <ThemeProvider>
