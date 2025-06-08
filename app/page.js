@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Welcome from "./welcome/Welcome";
-import SplashScreen from "./components/SplashScreen";
+import dynamic from 'next/dynamic';
+
+const SplashScreen = dynamic(() => import('./components/SplashScreen'), { ssr: false });
 
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true);

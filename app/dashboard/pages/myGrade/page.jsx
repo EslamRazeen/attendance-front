@@ -17,6 +17,7 @@ const MyGradePage = () => {
   const [status, setStatus] = useState("");
   const [selectAll, setSelectAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showUpgradeConfirmModal, setShowUpgradeConfirmModal] = useState(false);
 
   // Fetch students based on selected level and departments
   useEffect(() => {
@@ -111,6 +112,12 @@ const MyGradePage = () => {
 
   // Handle upgrade students
   const handleUpgradeStudents = async () => {
+    setShowUpgradeConfirmModal(true);
+  };
+
+  const confirmAndProceedUpgrade = async () => {
+    setShowUpgradeConfirmModal(false);
+
     if (filteredStudents.length === 0) {
       setStatus("No students available to upgrade.");
       return;
@@ -288,7 +295,7 @@ const MyGradePage = () => {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="flex items-center">
               <h2 className="text-lg font-semibold text-white">
-                {loading ? "Loading students..." : `Selected ${selectedStudents.length} of ${filteredStudents.length} students`}
+                {loading ? "Loading students..." : `${filteredStudents.length - selectedStudents.length} out of ${filteredStudents.length} students will be upgraded`}
               </h2>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -298,16 +305,16 @@ const MyGradePage = () => {
                   className="flex items-center gap-2 px-4 py-2 bg-[#1a1f2e] text-blue-300 rounded-lg hover:bg-[#1a1f2e]/80 transition-colors"
                 >
                   {selectAll ? <FaTimesCircle /> : <FaCheckCircle />}
-                  <span>{selectAll ? "Deselect All" : "Select All"}</span>
+                  <span>{selectAll ? "Deselect All to Upgrade" : "Select All to Hold Back"}</span>
                 </button>
               )}
               <button
                 onClick={handleUpgradeStudents}
-                disabled={upgrading || selectedStudents.length === 0}
+                disabled={upgrading || filteredStudents.length === 0}
                 className={`flex items-center gap-2 px-6 py-2 rounded-lg transition-colors ${
-                  selectedStudents.length > 0
-                    ? "bg-green-600 hover:bg-green-700 text-white"
-                    : "bg-gray-600 text-gray-300 cursor-not-allowed"
+                  (upgrading || filteredStudents.length === 0)
+                    ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+                    : "bg-green-600 hover:bg-green-700 text-white"
                 }`}
               >
                 {upgrading ? (
@@ -401,10 +408,10 @@ const MyGradePage = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    className={`bg-[#1a1f2e] p-4 rounded-xl border-2 transition-all duration-200 ${
+                    className={`bg-[#1a1f2e] p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer ${
                       selectedStudents.includes(student._id)
-                        ? "border-green-500 shadow-lg shadow-green-500/10"
-                        : "border-[#2a2f3e] hover:border-blue-500/50"
+                        ? "border-red-500 shadow-lg shadow-red-500/10"
+                        : "border-green-500 shadow-lg shadow-green-500/10"
                     }`}
                     onClick={() => toggleStudentSelection(student._id)}
                   >
@@ -429,12 +436,14 @@ const MyGradePage = () => {
                       <div className="flex-shrink-0">
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                           selectedStudents.includes(student._id)
-                            ? "bg-green-500 text-white"
-                            : "bg-gray-700 text-gray-400"
+                            ? "bg-red-500 text-white"
+                            : "bg-green-500 text-white"
                         }`}>
                           {selectedStudents.includes(student._id) ? (
+                            <FaTimesCircle className="text-sm" />
+                          ) : (
                             <FaCheckCircle className="text-sm" />
-                          ) : null}
+                          )}
                         </div>
                       </div>
                     </div>
@@ -443,6 +452,70 @@ const MyGradePage = () => {
               </AnimatePresence>
             </div>
           )}
+        </motion.div>
+      )}
+
+      {/* Custom Upgrade Confirmation Modal */}
+      {showUpgradeConfirmModal && (
+        <motion.div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            className="bg-[#1a1f2e] p-6 rounded-xl max-w-md w-full mx-4 border border-blue-500/30 shadow-lg shadow-blue-500/10"
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            transition={{ type: "spring", duration: 0.5 }}
+          >
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mr-4">
+                <FaArrowUp className="text-blue-500 text-xl" />
+              </div>
+              <h3 className="text-xl font-bold text-white">Confirm Upgrade</h3>
+            </div>
+
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-6">
+              <p className="text-gray-300">
+                Are you sure you want to upgrade these students to the next level?
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-4">
+              <motion.button
+                className="px-4 py-2 bg-gray-700/50 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setShowUpgradeConfirmModal(false)}
+              >
+                Cancel
+              </motion.button>
+              <motion.button
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center"
+                whileHover={{ scale: 1.03, boxShadow: "0 5px 15px rgba(34, 197, 94, 0.2)" }}
+                whileTap={{ scale: 0.97 }}
+                onClick={confirmAndProceedUpgrade}
+                disabled={upgrading}
+              >
+                {upgrading ? (
+                  <>
+                    <motion.div
+                      className="w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    />
+                    Upgrading...
+                  </>
+                ) : (
+                  <>
+                    <FaArrowUp className="mr-2" /> Upgrade
+                  </>
+                )}
+              </motion.button>
+            </div>
+          </motion.div>
         </motion.div>
       )}
     </motion.div>

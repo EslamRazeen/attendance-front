@@ -75,7 +75,7 @@ const Document = () => {
         variants={containerVariants}
       >
         <motion.div
-          className="bg-[#1a1f2e] p-4 sm:p-6 rounded-xl border border-[#2a2f3e] hover:border-blue-500/30 transition-colors w-full sm:w-2/3 md:w-1/2 lg:w-1/3"
+          className="bg-[#1a1f2e] p-4 sm:p-6 rounded-xl border border-[#2a2f3e] hover:border-blue-500/30 transition-colors w-full sm:w-2/3 md:w-1/2 lg:w-1/3 cursor-pointer"
           variants={cardVariants}
           whileHover="hover"
           onClick={() => router.push('/dashboard/pages/document/upload')}

@@ -16,7 +16,7 @@ export const attendanceApiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Attendance"],
+  tagTypes: ["Attendance", "Apology"],
   endpoints: (builder) => ({
     getAllAttendances: builder.query({
       query: (courseId) => {
@@ -250,9 +250,6 @@ export const attendanceApiSlice = createApi({
           url: `/studentInfo`,
           method: "POST",
           body: users,
-          headers: {
-            "Content-Type": "application/json",
-          },
         };
       },
       invalidatesTags: ["Attendance"],
@@ -260,10 +257,65 @@ export const attendanceApiSlice = createApi({
         if (response.status) {
           return {
             status: response.status,
-            message: response.data?.message || 'Failed to load student file'
+            message: response.data?.message || 'Failed to add students'
           };
         }
         return { status: 'NETWORK_ERROR', message: 'Failed to connect to server' };
+      },
+    }),
+
+    getAllApologies: builder.query({
+      query: () => 'apology',
+      providesTags: ["Apology"],
+      transformResponse: (response) => {
+        // Assuming the API returns an array of apologies directly or within a 'data' field
+        return response.data || response;
+      },
+      transformErrorResponse: (response) => {
+        if (response.status) {
+          return {
+            status: response.status,
+            message: response.data?.message || 'Failed to fetch apologies'
+          };
+        }
+        return { status: 'NETWORK_ERROR', message: 'Failed to connect to server' };
+      },
+    }),
+
+    updateApologyStatus: builder.mutation({
+      query: ({ id, status, reason }) => ({
+        url: `apology/${id}`,
+        method: 'PUT',
+        body: { status, reason },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+      invalidatesTags: ["Apology"],
+      transformErrorResponse: (response) => {
+        if (response.status) {
+          return {
+            status: response.status,
+            message: response.data?.message || 'Failed to update apology status'
+          };
+        }
+        return { status: 'NETWORK_ERROR', message: 'Failed to connect to server' };
+      },
+    }),
+
+    getInstructorApologies: builder.query({
+      query: () => `/apology/instructor`,
+      providesTags: ["Apology"],
+      transformResponse: (response) => {
+        // Assuming the API returns an object with a 'data' property containing the array
+        if (response && response.data && Array.isArray(response.data)) {
+          return response.data;
+        }
+        return []; // Return empty array if data is not as expected
+      },
+      transformErrorResponse: (response) => {
+        console.error("Instructor apologies endpoint error:", response);
+        return [];
       },
     }),
   }),
@@ -276,5 +328,8 @@ export const {
   useGetInstructorStatsQuery,
   useAddStudentAttendanceMutation, 
   useAddStudentsSheetMutation,
-  useGetStudentsByDateQuery
+  useGetStudentsByDateQuery,
+  useGetAllApologiesQuery,
+  useUpdateApologyStatusMutation,
+  useGetInstructorApologiesQuery
 } = attendanceApiSlice;
