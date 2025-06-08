@@ -227,6 +227,10 @@ const InstructorApologiesPage = () => {
             ))}
           </select>
         </div>
+        {/* Display Filtered Apologies Count */}
+        <div className="text-gray-400 text-sm md:text-base mt-4 md:mt-0">
+          Total Apologies: <span className="font-semibold text-white">{filteredApologies.length}</span>
+        </div>
       </motion.div>
 
       {/* Apologies List */}

@@ -223,6 +223,14 @@ const ApologiesPage = () => {
         </div>
       </motion.div>
 
+      {/* Display Filtered Apologies Count - Moved to a new, less crowded spot */}
+      <motion.div
+        className="w-full text-gray-400 text-base font-semibold mb-6 text-center md:text-left"
+        variants={itemVariants}
+      >
+        Total Apologies: <span className="text-white">{filteredApologies.length}</span>
+      </motion.div>
+
       {/* Filters and Search Bar */}
       <motion.div
         className="bg-[#1a1f2e] p-6 rounded-xl border border-[#2a2f3e] mb-6 flex flex-col md:flex-row gap-4 items-center justify-between"
@@ -240,26 +248,26 @@ const ApologiesPage = () => {
           <FaUserGraduate className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
 
-        {/* Status Filter */}
+        {/* Status Filters */}
         <div className="flex flex-wrap gap-2 md:gap-4 justify-center">
           {statuses.map(status => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${statusFilter === status ? getStatusColor(status).replace('/20', '') + ' shadow-md' : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'}`}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${statusFilter === status ? 'bg-blue-600 shadow-md' : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'}`}
             >
               {status.charAt(0).toUpperCase() + status.slice(1)}
             </button>
           ))}
         </div>
 
-        {/* Department Filter */}
+        {/* Department Filters */}
         <div className="flex flex-wrap gap-2 md:gap-4 justify-center">
           {departments.map(dept => (
             <button
               key={dept}
               onClick={() => setDepartmentFilter(dept)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${departmentFilter === dept ? 'bg-blue-600 shadow-md text-white' : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'}`}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${departmentFilter === dept ? 'bg-blue-600 shadow-md' : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'}`}
             >
               {dept.toUpperCase()}
             </button>
@@ -297,14 +305,14 @@ const ApologiesPage = () => {
                   <div className="w-12 h-12 rounded-full bg-purple-600/20 flex items-center justify-center mr-4 flex-shrink-0">
                     <FaUserGraduate className="text-purple-400 text-xl" />
                   </div>
-                  <div className="flex-1">
+                  <div className="min-w-0">
                     <h3 className="text-xl font-semibold text-white mb-1">
                       {apology.student?.name || "Unknown Student"}
                     </h3>
                     <p className="text-gray-400 text-sm">{(apology.student && apology.student.email) ? apology.student.email : "No Email"}</p>
                   </div>
                   <span
-                    className={`ml-auto px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${getStatusColor(apology.status)}`}
+                    className={`ml-auto px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 flex-shrink-0 ${getStatusColor(apology.status)}`}
                   >
                     {getStatusIcon(apology.status)} {apology.status}
                   </span>

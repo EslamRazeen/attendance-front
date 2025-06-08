@@ -26,6 +26,7 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
     { icon: <FaFolder />, label: "Documents", href: "/dashboard/pages/document" },
     { icon: <FaUserGraduate />, label: "Edit Students", href: "/dashboard/pages/document/studentsEdit" },
     { icon: <FaArrowUp />, label: "My Grade", href: "/dashboard/pages/myGrade" },
+    { icon: <FaMessage />, label: "Messages", href: "/dashboard/pages/messages" },
   ] : [
     { icon: <MdOutlineDashboard />, label: "Dashboard", href: "/dashboard" },
     { icon: <MdSubject />, label: "Subjects", href: "/dashboard/doctor/subjects" },
